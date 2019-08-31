@@ -10,12 +10,12 @@
 
     <application>
 
-        <receiver android:name="PushMessageReceiver">
-            <intent-filter>
-                <category android:name="com.chabokrnwrapper"/>
-                <action android:name="com.adpdigital.push.client.MSGRECEIVE"/>
-            </intent-filter>
-        </receiver>
+        <!--<receiver android:name="PushMessageReceiver">-->
+            <!--<intent-filter>-->
+                <!--<category android:name="com.chabokrnwrapper"/>-->
+                <!--<action android:name="com.adpdigital.push.client.MSGRECEIVE"/>-->
+            <!--</intent-filter>-->
+        <!--</receiver>-->
 
         <receiver
                 android:name="com.google.android.gms.gcm.GcmReceiver"
