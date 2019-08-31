@@ -103,8 +103,13 @@ RCT_EXPORT_METHOD(initializeApp:(NSDictionary *) options
 
 #pragma mark - Register methods
 
-RCT_EXPORT_METHOD(registerAsGuest) {
-    BOOL state = [PushClientManager.defaultManager registerAsGuest];
+RCT_EXPORT_METHOD(registerAsGuest:(NSString *)guestId) {
+    BOOL state;
+    if (guestId) {
+        state = [PushClientManager.defaultManager registerAsGuest:guestId];
+    } else {
+        state = [PushClientManager.defaultManager registerAsGuest];
+    }
     if (state) {
         RCTLogInfo(@"Registered to chabok");
     } else {

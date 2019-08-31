@@ -463,8 +463,12 @@ class AdpPushClientModule extends ReactContextBaseJavaModule implements Lifecycl
     }
 
     @ReactMethod
-    public void registerAsGuest() {
-        chabok.registerAsGuest();
+    public void registerAsGuest(String guestId) {
+        if(guestId != null){
+            chabok.registerAsGuest(guestId);
+        } else {
+            chabok.registerAsGuest();
+        }
     }
 
     @ReactMethod
