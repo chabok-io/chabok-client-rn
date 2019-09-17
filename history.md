@@ -1,7 +1,7 @@
 ## History
 ### v1.4.0 (26/06/2019)
 - Update Chabok iOS SDK ([v1.20.0](https://github.com/chabokpush/chabok-client-ios/releases/tag/v1.20.0))
-- Update Chabok android SDK ([v2.17.0](https://github.com/chabokpush/chabok-client-android/releases/tag/v2.17.0))
+- Update Chabok android SDK ([v2.18.1](https://github.com/chabokpush/chabok-client-android/releases/tag/v2.18.1))
 - Now Chabok supports user revenue with `trackPurchase` method.
 - Now Chabok supports direct/in-direct notification influence.
 - Now Chabok supports deferred deep linking with `setDeeplinkCallbackListener` method.
