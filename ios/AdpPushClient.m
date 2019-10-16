@@ -106,7 +106,7 @@ RCT_EXPORT_METHOD(initializeApp:(NSDictionary *) options
 RCT_EXPORT_METHOD(registerAsGuest:(NSString *)guestId) {
     BOOL state;
     if (guestId) {
-        state = [PushClientManager.defaultManager registerAsGuest:guestId];
+        state = [PushClientManager.defaultManager registerWithGuestId:guestId];
     } else {
         state = [PushClientManager.defaultManager registerAsGuest];
     }
