@@ -1,0 +1,39 @@
+{
+  "name": "react-native-chabok",
+  "title": "React native wrapper for Chabok SDK",
+  "version": "2.0.0",
+  "description": "React native wrapper for Chabok SDK",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "nativePackage": true,
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/chabok-io/chabok-client-rn.git",
+    "baseUrl": "https://github.com/chabok-io/chabok-client-rn.git"
+  },
+  "keywords": [
+    "Chabok",
+    "push notification",
+    "realtime messaging"
+  ],
+  "author": {
+    "name": "Chabok Realtime Solutions",
+    "email": "info@chabok.io"
+  },
+  "license": "Apache-2.0",
+  "readmeFilename": "README.md",
+  "bugs": {
+    "url": "https://github.com/chabok-io/chabok-client-rn/issues"
+  },
+  "homepage": "https://github.com/chabok-io/chabok-client-rn",
+  "peerDependencies": {
+    "react": "^16.8.1",
+    "react-native": ">=0.59.0-rc.0 <1.0.x"
+  },
+  "devDependencies": {
+    "react": "^16.8.3",
+    "react-native": "^0.59.10"
+  }
+}
