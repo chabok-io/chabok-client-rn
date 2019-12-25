@@ -612,23 +612,23 @@ class AdpPushClientModule extends ReactContextBaseJavaModule implements Lifecycl
         }
     }
 
-    // @ReactMethod
-    // public void setOnReferralResponseListener(final Promise promise) {
-    //     if (chabok != null) {
-    //         chabok.setDeferredDataListener(new DeferredDataListener() {
-    //             @Override
-    //             public boolean launchReceivedDeeplink(Uri deeplink) {
-    //                 // ignore it!
-    //                 return false;
-    //             }
+    @ReactMethod
+    public void setOnReferralResponseListener(final Promise promise) {
+        if (chabok != null) {
+            chabok.setDeferredDataListener(new DeferredDataListener() {
+                @Override
+                public boolean launchReceivedDeeplink(Uri deeplink) {
+                    // ignore it!
+                    return false;
+                }
 
-    //             @Override
-    //             public void onReferralReceived(String referralId) {
-    //                 promise.resolve(referralId);
-    //             }
-    //         });
-    //     }
-    // }
+                @Override
+                public void onReferralReceived(String referralId) {
+                    promise.resolve(referralId);
+                }
+            });
+        }
+    }
 
     @ReactMethod
     public void subscribeEvent(final String eventName, final Promise promise) {
@@ -821,26 +821,26 @@ class AdpPushClientModule extends ReactContextBaseJavaModule implements Lifecycl
         }
     }
 
-    // @ReactMethod
-    // public void unsetUserAttribute(String attributeKey) {
-    //     if (chabok != null) {
-    //         chabok.unsetUserAttribute(attributeKey);
-    //     }
-    // }
+    @ReactMethod
+    public void unsetUserAttribute(String attributeKey) {
+        if (chabok != null) {
+            chabok.unsetUserAttribute(attributeKey);
+        }
+    }
 
-    // @ReactMethod
-    // public void addToUserAttributeArray(String attributeKey, String attributeValue) {
-    //     if (chabok != null) {
-    //         chabok.addToUserAttributeArray(attributeKey, attributeValue);
-    //     }
-    // }
+    @ReactMethod
+    public void addToUserAttributeArray(String attributeKey, String attributeValue) {
+        if (chabok != null) {
+            chabok.addToUserAttributeArray(attributeKey, attributeValue);
+        }
+    }
 
-    // @ReactMethod
-    // public void removeFromUserAttributeArray(String attributeKey, String attributeValue) {
-    //     if (chabok != null) {
-    //         chabok.removeFromUserAttributeArray(attributeKey, attributeValue);
-    //     }
-    // }
+    @ReactMethod
+    public void removeFromUserAttributeArray(String attributeKey, String attributeValue) {
+        if (chabok != null) {
+            chabok.removeFromUserAttributeArray(attributeKey, attributeValue);
+        }
+    }
 
     @ReactMethod
     public void incrementUserAttribute(String attribute, int value) {
