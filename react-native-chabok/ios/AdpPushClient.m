@@ -289,11 +289,11 @@ RCT_EXPORT_METHOD(setNotificationOpenedHandler) {
     return self.shouldLaunchDeeplink;
 }
 
-// - (void)chabokReferralResponse:(NSString *)referralId {
-//     if(referralId && self.getReferralResponseCallback){
-//         self.getReferralResponseCallback(referralId);
-//     }
-// }
+- (void)chabokReferralResponse:(NSString *)referralId {
+    if(referralId && self.getReferralResponseCallback){
+        self.getReferralResponseCallback(referralId);
+    }
+}
 
 - (NSArray<NSString *> *)supportedEvents{
     return @[@"connectionStatus",@"onEvent",@"onMessage", @"ChabokMessageReceived", @"onSubscribe", @"onUnsubscribe", @"onRegister", @"notificationOpened"];
