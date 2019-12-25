@@ -183,11 +183,6 @@ dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
     implementation "com.facebook.react:react-native:+"  // From node_modules
 
-    implementation 'com.adpdigital.push:chabok-lib:3.1.0'
-    implementation 'me.leolin:ShortcutBadger:1.1.22@aar'
-    implementation 'com.google.firebase:firebase-messaging:17.1.0'
-    implementation 'com.android.installreferrer:installreferrer:1.0'
-
     if (enableHermes) {
         def hermesPath = "../../node_modules/hermes-engine/android/";
         debugImplementation files(hermesPath + "hermes-debug.aar")
