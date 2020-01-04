@@ -20,7 +20,7 @@ import com.adpdigital.push.ChabokNotificationAction;
 import com.adpdigital.push.ConnectionStatus;
 import com.adpdigital.push.DeferredDataListener;
 import com.adpdigital.push.EventMessage;
-import com.adpdigital.push.OnDeeplinkResponseListener;
+import com.adpdigital.push.NotificationHandler;
 import com.adpdigital.push.PushMessage;
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.LifecycleEventListener;
@@ -64,12 +64,15 @@ class AdpPushClientModule extends ReactContextBaseJavaModule implements Lifecycl
     private AdpPushClient chabok;
     private final LocalBroadcastManager localBroadcastManager;
     private ReactApplicationContext mReactContext;
-    private LocalBroadcastReceiver mLocalBroadcastReceiver;
-    private Class activityClass;
-    private boolean setNotificationOpenedHandler = false;
+    private ConnectionLocalBroadcastReceiver mConnectionLocalBroadcastReceiver;
 
     public static ChabokNotification coldStartChabokNotification;
     public static ChabokNotificationAction coldStartChabokNotificationAction;
+
+    public Uri deferredDeepLink;
+    public String referrerId;
+
+    private String lastMessageId;
 
     public AdpPushClient getChabok() {
         return chabok;
@@ -77,255 +80,86 @@ class AdpPushClientModule extends ReactContextBaseJavaModule implements Lifecycl
 
     public AdpPushClientModule(ReactApplicationContext reactContext) {
         super(reactContext);
-        this.mReactContext = reactContext;
 
-        registerMessageHandler();
-        this.mLocalBroadcastReceiver = new LocalBroadcastReceiver();
+        mReactContext = reactContext;
         localBroadcastManager = LocalBroadcastManager.getInstance(reactContext);
-        localBroadcastManager.registerReceiver(mLocalBroadcastReceiver, new IntentFilter(Constants.ACTION_CONNECTION_STATUS));
+        mConnectionLocalBroadcastReceiver = new ConnectionLocalBroadcastReceiver();
 
         chabok = AdpPushClient.get();
         if (chabok != null) {
+            // handle notifications
+            chabok.addNotificationHandler(new NotificationHandler() {
+                @Override
+                public boolean notificationOpened(ChabokNotification message, ChabokNotificationAction notificationAction) {
+                    AdpPushClientModule.coldStartChabokNotification = message;
+                    AdpPushClientModule.coldStartChabokNotificationAction = notificationAction;
+
+                    if (mAppState.equals(APP_STATE_ACTIVE)) {
+                        handleNotificationOpened();
+                    }
+
+                    return super.notificationOpened(message, notificationAction);
+                }
+            });
+
+            // handle deferred data
+            chabok.setDeferredDataListener(new DeferredDataListener() {
+                @Override
+                public boolean launchReceivedDeeplink(Uri uri) {
+                    if (uri != null) {
+                        deferredDeepLink = uri;
+                    }
+                    return false;
+                }
+
+                @Override
+                public void onReferralReceived(String id) {
+                    referrerId = id;
+                }
+            });
+        }
+    }
+
+    @Override
+    public void onHostResume() {
+        mAppState = APP_STATE_ACTIVE;
+
+        if (chabok != null) {
             attachChabokClient();
         }
+        if (mConnectionLocalBroadcastReceiver != null) {
+            localBroadcastManager.registerReceiver(mConnectionLocalBroadcastReceiver,
+                    new IntentFilter(Constants.ACTION_CONNECTION_STATUS));
+        }
+
+        sendAppStateChangeEvent();
+
+        coldStartChabokNotification = chabok.getLastNotificationData();
+        coldStartChabokNotificationAction = chabok.getLastNotificationAction();
+
+        handleNotificationOpened();
     }
 
-    @ReactMethod
-    public void setNotificationOpenedHandler() {
-        this.setNotificationOpenedHandler = true;
-        if (coldStartChabokNotificationAction != null &&
-                coldStartChabokNotification != null) {
+    @Override
+    public void onHostPause() {
+        mAppState = APP_STATE_BACKGROUND;
 
-            notificationOpenedEvent(coldStartChabokNotification, coldStartChabokNotificationAction);
-
-            coldStartChabokNotification = null;
-            coldStartChabokNotificationAction = null;
+        if (chabok != null) {
+            detachClient();
         }
+        if (mConnectionLocalBroadcastReceiver != null) {
+            localBroadcastManager.unregisterReceiver(mConnectionLocalBroadcastReceiver);
+        }
+
+        sendAppStateChangeEvent();
     }
 
-    private void notificationOpenedEvent(ChabokNotification message, ChabokNotificationAction notificationAction) {
-        final WritableMap response = Arguments.createMap();
-        if (notificationAction.actionID != null) {
-            response.putString("actionId", notificationAction.actionID);
-        }
-        if (notificationAction.actionUrl != null) {
-            response.putString("actionUrl", notificationAction.actionUrl);
-        }
-
-        if (notificationAction.type == ChabokNotificationAction.ActionType.Opened) {
-            response.putString("actionType", "opened");
-        } else if (notificationAction.type == ChabokNotificationAction.ActionType.Dismissed) {
-            response.putString("actionType", "dismissed");
-        } else if (notificationAction.type == ChabokNotificationAction.ActionType.ActionTaken) {
-            response.putString("actionType", "action_taken");
-        }
-
-        WritableMap msgMap = Arguments.createMap();
-
-        if (message.getTitle() != null) {
-            msgMap.putString("title", message.getTitle());
-        }
-        if (message.getId() != null) {
-            msgMap.putString("id", message.getId());
-        }
-
-        if (message.getText() != null) {
-            msgMap.putString("body", message.getText());
-        }
-        if (message.getTrackId() != null) {
-            msgMap.putString("trackId", message.getTrackId());
-        }
-        if (message.getTopicName() != null) {
-            msgMap.putString("channel", message.getTopicName());
-        }
-
-        if (message.getSound() != null) {
-            msgMap.putString("sound", message.getSound());
-        }
-
-        try {
-            Bundle data = message.getExtras();
-            if (data != null) {
-                msgMap.putMap("data", toWritableMap(new JSONObject(bundleToJson(data))));
-            }
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
-        response.putMap("message", msgMap);
-
-        if (!this.setNotificationOpenedHandler) {
-            if (coldStartChabokNotification == null) {
-                coldStartChabokNotification = message;
-            }
-            if (coldStartChabokNotificationAction == null) {
-                coldStartChabokNotificationAction = notificationAction;
-            }
-        }
-
-        if (mReactContext.hasActiveCatalystInstance()) {
-            sendEvent("notificationOpened", response);
-        }
-    }
-
-    public void onEvent(ConnectionStatus status) {
-        updateConnectionStatus(status);
-    }
-
-    public void onEvent(final PushMessage msg) {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                WritableMap response = Arguments.createMap();
-                response.putString("alertText", msg.getAlertText());
-                response.putString("alertTitle", msg.getAlertTitle());
-                response.putString("body", msg.getBody());
-                response.putString("intentType", msg.getIntentType());
-                response.putString("senderId", msg.getSenderId());
-                response.putString("sentId", msg.getSentId());
-                response.putString("id", msg.getId());
-                response.putString("sound", msg.getSound());
-                response.putString("channel", msg.getChannel());
-                response.putDouble("receivedAt", msg.getReceivedAt());
-                response.putDouble("createdAt", msg.getCreatedAt());
-                response.putDouble("expireAt", msg.getExpireAt());
-                if (msg.getData() != null) {
-                    try {
-                        response.putMap("data", toWritableMap(msg.getData()));
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                }
-
-                if (msg.getNotification() != null) {
-                    try {
-                        response.putMap("notification", toWritableMap(msg.getNotification()));
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                }
-
-                //sendEvent("onMessage", response);
-                sendEvent("ChabokMessageReceived", response);
-            }
-        });
-    }
-
-    public void onEvent(final EventMessage eventMessage) {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                WritableMap response = Arguments.createMap();
-
-                response.putString("id", eventMessage.getId());
-                response.putString("eventName", eventMessage.getName());
-                response.putString("installationId", eventMessage.getInstallationId());
-                if (eventMessage.getData() != null) {
-                    try {
-                        response.putMap("data", toWritableMap(eventMessage.getData()));
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                }
-
-                sendEvent("onEvent", response);
-            }
-        });
-    }
-
-    public static WritableMap toWritableMap(JSONObject jsonObject) throws JSONException {
-        WritableMap writableMap = Arguments.createMap();
-        Iterator iterator = jsonObject.keys();
-        while (iterator.hasNext()) {
-            String key = (String) iterator.next();
-            Object value = jsonObject.get(key);
-            if (value instanceof Float || value instanceof Double) {
-                writableMap.putDouble(key, jsonObject.getDouble(key));
-            } else if (value instanceof Number) {
-                writableMap.putInt(key, jsonObject.getInt(key));
-            } else if (value instanceof String) {
-                writableMap.putString(key, jsonObject.getString(key));
-            } else if (value instanceof JSONObject) {
-                writableMap.putMap(key, toWritableMap(jsonObject.getJSONObject(key)));
-            } else if (value instanceof JSONArray) {
-                writableMap.putArray(key, toWritableMap(jsonObject.getJSONArray(key)));
-            } else if (value == JSONObject.NULL) {
-                writableMap.putNull(key);
-            }
-        }
-
-        return writableMap;
-    }
-
-    public static WritableArray toWritableMap(JSONArray jsonArray) throws JSONException {
-        WritableArray writableArray = Arguments.createArray();
-        for (int i = 0; i < jsonArray.length(); i++) {
-            Object value = jsonArray.get(i);
-            if (value instanceof Float || value instanceof Double) {
-                writableArray.pushDouble(jsonArray.getDouble(i));
-            } else if (value instanceof Number) {
-                writableArray.pushInt(jsonArray.getInt(i));
-            } else if (value instanceof String) {
-                writableArray.pushString(jsonArray.getString(i));
-            } else if (value instanceof JSONObject) {
-                writableArray.pushMap(toWritableMap(jsonArray.getJSONObject(i)));
-            } else if (value instanceof JSONArray) {
-                writableArray.pushArray(toWritableMap(jsonArray.getJSONArray(i)));
-            } else if (value == JSONObject.NULL) {
-                writableArray.pushNull();
-            }
-        }
-        return writableArray;
-    }
-
-    private void attachChabokClient() {
-        chabok.setPushListener(this);
-        fetchAndUpdateConnectionStatus();
-    }
-
-    private void detachClient() {
-        chabok.removePushListener(this);
-        fetchAndUpdateConnectionStatus();
-    }
-
-    private void updateConnectionStatus(final ConnectionStatus connectionStatus) {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                String statusValue = connectionStatus.toString();
-                sendEvent("connectionStatus", statusValue);
-            }
-        });
-    }
-
-
-    private void fetchAndUpdateConnectionStatus() {
-        chabok.getStatus(new Callback<ConnectionStatus>() {
-            @Override
-            public void onSuccess(final ConnectionStatus connectionStatus) {
-                updateConnectionStatus(connectionStatus);
-            }
-
-            @Override
-            public void onFailure(Throwable throwable) {
-                Log.i(TAG, "Chabok ConnectionStatus error");
-            }
-        });
-    }
-
-    private Class getMainActivityClass() {
-        if (activityClass != null) {
-            return activityClass;
-        } else {
-            String packageName = mReactContext.getPackageName();
-            Intent launchIntent = mReactContext.getPackageManager().getLaunchIntentForPackage(packageName);
-            String className = launchIntent.getComponent().getClassName();
-            try {
-                return Class.forName(className);
-            } catch (ClassNotFoundException e) {
-                e.printStackTrace();
-                return null;
-            }
+    @Override
+    public void onHostDestroy() {
+        // By the current implementation, the
+        // catalyst instance is going to be immediately dropped, and all JS calls with it.
+        if (chabok != null) {
+            chabok.dismiss();
         }
     }
 
@@ -345,22 +179,6 @@ class AdpPushClientModule extends ReactContextBaseJavaModule implements Lifecycl
 
         constants.put("playServicesAvailability", getPlayServicesStatus());
         return constants;
-    }
-
-    private WritableMap getPlayServicesStatus() {
-        GoogleApiAvailability gapi = GoogleApiAvailability.getInstance();
-        final int status = gapi.isGooglePlayServicesAvailable(getReactApplicationContext());
-        WritableMap result = Arguments.createMap();
-
-        if (status == ConnectionResult.SUCCESS) {
-            result.putBoolean("isAvailable", true);
-        } else {
-            result.putBoolean("isAvailable", false);
-            result.putString("error", gapi.getErrorString(status));
-            result.putBoolean("isUserResolvableError", gapi.isUserResolvableError(status));
-            result.putBoolean("hasResolution", new ConnectionResult(status).hasResolution());
-        }
-        return result;
     }
 
     @ReactMethod
@@ -398,13 +216,8 @@ class AdpPushClientModule extends ReactContextBaseJavaModule implements Lifecycl
             WritableMap params = Arguments.createMap();
 
             params.putBoolean("isRegister", true);
-            sendEvent("onRegister", params);
+            sendEvent(Constants.EVENT_REGISTER, params);
         }
-    }
-
-    @ReactMethod
-    public void setDevelopment(Boolean devMode) {
-        chabok.setDevelopment(devMode);
     }
 
 //    @ReactMethod
@@ -596,37 +409,18 @@ class AdpPushClientModule extends ReactContextBaseJavaModule implements Lifecycl
     }
 
     @ReactMethod
-    public void setOnDeeplinkResponseListener(final boolean shouldLaunchDeeplink, final Promise promise) {
-        if (chabok != null) {
-            chabok.setOnDeeplinkResponseListener(new OnDeeplinkResponseListener() {
-                @Override
-                public boolean launchReceivedDeeplink(Uri uri) {
-                    if (uri != null) {
-                        promise.resolve(uri.toString());
-                    } else {
-                        return false;
-                    }
-                    return shouldLaunchDeeplink;
-                }
-            });
+    public void setOnDeeplinkResponseListener(final Promise promise) {
+        if (deferredDeepLink != null) {
+            promise.resolve(deferredDeepLink);
+            deferredDeepLink = null;
         }
     }
 
     @ReactMethod
     public void setOnReferralResponseListener(final Promise promise) {
-        if (chabok != null) {
-            chabok.setDeferredDataListener(new DeferredDataListener() {
-                @Override
-                public boolean launchReceivedDeeplink(Uri deeplink) {
-                    // ignore it!
-                    return false;
-                }
-
-                @Override
-                public void onReferralReceived(String referralId) {
-                    promise.resolve(referralId);
-                }
-            });
+        if (referrerId != null) {
+            promise.resolve(referrerId);
+            referrerId = null;
         }
     }
 
@@ -643,7 +437,7 @@ class AdpPushClientModule extends ReactContextBaseJavaModule implements Lifecycl
                 WritableMap params = Arguments.createMap();
 
                 params.putString("name", eventName);
-                sendEvent("onSubscribe", params);
+                sendEvent(Constants.EVENT_SUBSCRIBE, params);
             }
 
             @Override
@@ -652,7 +446,7 @@ class AdpPushClientModule extends ReactContextBaseJavaModule implements Lifecycl
                 WritableMap params = Arguments.createMap();
 
                 params.putString("error", throwable.getMessage());
-                sendEvent("onSubscribe", params);
+                sendEvent(Constants.EVENT_SUBSCRIBE, params);
             }
         });
     }
@@ -673,7 +467,7 @@ class AdpPushClientModule extends ReactContextBaseJavaModule implements Lifecycl
                     WritableMap params = Arguments.createMap();
 
                     params.putString("name", eventName);
-                    sendEvent("onSubscribe", params);
+                    sendEvent(Constants.EVENT_SUBSCRIBE, params);
                 }
 
                 @Override
@@ -682,7 +476,7 @@ class AdpPushClientModule extends ReactContextBaseJavaModule implements Lifecycl
                     WritableMap params = Arguments.createMap();
 
                     params.putString("error", throwable.getMessage());
-                    sendEvent("onSubscribe", params);
+                    sendEvent(Constants.EVENT_SUBSCRIBE, params);
                 }
             });
         }
@@ -694,14 +488,14 @@ class AdpPushClientModule extends ReactContextBaseJavaModule implements Lifecycl
             promise.reject(new IllegalArgumentException("channel parameter is null or empty"));
             return;
         }
-        chabok.subscribe(channel, true, new Callback() {
+        chabok.subscribe(channel, new Callback() {
             @Override
             public void onSuccess(Object value) {
                 promise.resolve(true);
                 WritableMap params = Arguments.createMap();
 
                 params.putString("name", channel);
-                sendEvent("onSubscribe", params);
+                sendEvent(Constants.EVENT_SUBSCRIBE, params);
             }
 
             @Override
@@ -710,7 +504,7 @@ class AdpPushClientModule extends ReactContextBaseJavaModule implements Lifecycl
                 WritableMap params = Arguments.createMap();
 
                 params.putString("error", throwable.getMessage());
-                sendEvent("onSubscribe", params);
+                sendEvent(Constants.EVENT_SUBSCRIBE, params);
             }
         });
     }
@@ -728,7 +522,7 @@ class AdpPushClientModule extends ReactContextBaseJavaModule implements Lifecycl
                 WritableMap params = Arguments.createMap();
 
                 params.putString("name", channel);
-                sendEvent("onUnsubscribe", params);
+                sendEvent(Constants.EVENT_UNSUBSCRIBE, params);
             }
 
             @Override
@@ -737,7 +531,7 @@ class AdpPushClientModule extends ReactContextBaseJavaModule implements Lifecycl
                 WritableMap params = Arguments.createMap();
 
                 params.putString("error", throwable.getMessage());
-                sendEvent("onUnsubscribe", params);
+                sendEvent(Constants.EVENT_UNSUBSCRIBE, params);
             }
         });
     }
@@ -756,7 +550,7 @@ class AdpPushClientModule extends ReactContextBaseJavaModule implements Lifecycl
                 WritableMap params = Arguments.createMap();
 
                 params.putString("name", eventName);
-                sendEvent("onUnsubscribe", params);
+                sendEvent(Constants.EVENT_UNSUBSCRIBE, params);
             }
 
             @Override
@@ -765,7 +559,7 @@ class AdpPushClientModule extends ReactContextBaseJavaModule implements Lifecycl
                 WritableMap params = Arguments.createMap();
 
                 params.putString("error", throwable.getMessage());
-                sendEvent("onUnsubscribe", params);
+                sendEvent(Constants.EVENT_UNSUBSCRIBE, params);
             }
         });
     }
@@ -786,7 +580,7 @@ class AdpPushClientModule extends ReactContextBaseJavaModule implements Lifecycl
                     WritableMap params = Arguments.createMap();
 
                     params.putString("name", eventName);
-                    sendEvent("onUnsubscribe", params);
+                    sendEvent(Constants.EVENT_UNSUBSCRIBE, params);
                 }
 
                 @Override
@@ -795,7 +589,7 @@ class AdpPushClientModule extends ReactContextBaseJavaModule implements Lifecycl
                     WritableMap params = Arguments.createMap();
 
                     params.putString("error", throwable.getMessage());
-                    sendEvent("onUnsubscribe", params);
+                    sendEvent(Constants.EVENT_UNSUBSCRIBE, params);
                 }
             });
         }
@@ -858,9 +652,7 @@ class AdpPushClientModule extends ReactContextBaseJavaModule implements Lifecycl
 
     @ReactMethod
     public void setDefaultTracker(final String defaultTracker) {
-        if (chabok != null) {
-            chabok.setDefaultTracker(defaultTracker);
-        }
+        AdpPushClient.setDefaultTracker(defaultTracker);
     }
 
     @ReactMethod
@@ -874,34 +666,247 @@ class AdpPushClientModule extends ReactContextBaseJavaModule implements Lifecycl
         }
     }
 
-    @Override
-    public void onHostResume() {
-        if (chabok != null) {
-            attachChabokClient();
-        }
-        if (mLocalBroadcastReceiver != null) {
-            localBroadcastManager.registerReceiver(mLocalBroadcastReceiver, new IntentFilter(Constants.ACTION_CONNECTION_STATUS));
-        }
-        mAppState = APP_STATE_ACTIVE;
-        sendAppStateChangeEvent();
+    public void onEvent(ConnectionStatus status) {
+        updateConnectionStatus(status);
     }
 
-    @Override
-    public void onHostPause() {
-        if (chabok != null) {
-            detachClient();
-        }
-        if (mLocalBroadcastReceiver != null) {
-            localBroadcastManager.unregisterReceiver(mLocalBroadcastReceiver);
-        }
-        mAppState = APP_STATE_BACKGROUND;
-        sendAppStateChangeEvent();
+    public void onEvent(final PushMessage msg) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                WritableMap response = Arguments.createMap();
+                response.putString("alertText", msg.getAlertText());
+                response.putString("alertTitle", msg.getAlertTitle());
+                response.putString("body", msg.getBody());
+                response.putString("intentType", msg.getIntentType());
+                response.putString("senderId", msg.getSenderId());
+                response.putString("sentId", msg.getSentId());
+                response.putString("id", msg.getId());
+                response.putString("sound", msg.getSound());
+                response.putString("channel", msg.getChannel());
+                response.putDouble("receivedAt", msg.getReceivedAt());
+                response.putDouble("createdAt", msg.getCreatedAt());
+                response.putDouble("expireAt", msg.getExpireAt());
+                if (msg.getData() != null) {
+                    try {
+                        response.putMap("data", toWritableMap(msg.getData()));
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+                if (msg.getNotification() != null) {
+                    try {
+                        response.putMap("notification", toWritableMap(msg.getNotification()));
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+                sendEvent(Constants.EVENT_CHABOK_MESSAGE_RECEIVED, response);
+            }
+        });
     }
 
-    @Override
-    public void onHostDestroy() {
-        // By the current implementation, the
-        // catalyst instance is going to be immediately dropped, and all JS calls with it.
+    public void onEvent(final EventMessage eventMessage) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                WritableMap response = Arguments.createMap();
+
+                response.putString("id", eventMessage.getId());
+                response.putString("eventName", eventMessage.getName());
+                response.putString("installationId", eventMessage.getInstallationId());
+                if (eventMessage.getData() != null) {
+                    try {
+                        response.putMap("data", toWritableMap(eventMessage.getData()));
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+                sendEvent(Constants.EVENT_MESSAGE, response);
+            }
+        });
+    }
+
+    public static WritableMap toWritableMap(JSONObject jsonObject) throws JSONException {
+        WritableMap writableMap = Arguments.createMap();
+        Iterator iterator = jsonObject.keys();
+        while (iterator.hasNext()) {
+            String key = (String) iterator.next();
+            Object value = jsonObject.get(key);
+            if (value instanceof Float || value instanceof Double) {
+                writableMap.putDouble(key, jsonObject.getDouble(key));
+            } else if (value instanceof Number) {
+                writableMap.putInt(key, jsonObject.getInt(key));
+            } else if (value instanceof String) {
+                writableMap.putString(key, jsonObject.getString(key));
+            } else if (value instanceof JSONObject) {
+                writableMap.putMap(key, toWritableMap(jsonObject.getJSONObject(key)));
+            } else if (value instanceof JSONArray) {
+                writableMap.putArray(key, toWritableMap(jsonObject.getJSONArray(key)));
+            } else if (value == JSONObject.NULL) {
+                writableMap.putNull(key);
+            }
+        }
+
+        return writableMap;
+    }
+
+    public static WritableArray toWritableMap(JSONArray jsonArray) throws JSONException {
+        WritableArray writableArray = Arguments.createArray();
+        for (int i = 0; i < jsonArray.length(); i++) {
+            Object value = jsonArray.get(i);
+            if (value instanceof Float || value instanceof Double) {
+                writableArray.pushDouble(jsonArray.getDouble(i));
+            } else if (value instanceof Number) {
+                writableArray.pushInt(jsonArray.getInt(i));
+            } else if (value instanceof String) {
+                writableArray.pushString(jsonArray.getString(i));
+            } else if (value instanceof JSONObject) {
+                writableArray.pushMap(toWritableMap(jsonArray.getJSONObject(i)));
+            } else if (value instanceof JSONArray) {
+                writableArray.pushArray(toWritableMap(jsonArray.getJSONArray(i)));
+            } else if (value == JSONObject.NULL) {
+                writableArray.pushNull();
+            }
+        }
+        return writableArray;
+    }
+
+    public class ConnectionLocalBroadcastReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String status = intent.getStringExtra("status");
+            sendEvent(Constants.EVENT_CONNECTION_STATUS, status);
+        }
+    }
+
+    private void notificationOpenedEvent(ChabokNotification message, ChabokNotificationAction notificationAction) {
+        final WritableMap response = Arguments.createMap();
+        if (notificationAction.actionID != null) {
+            response.putString("actionId", notificationAction.actionID);
+        }
+        if (notificationAction.actionUrl != null) {
+            response.putString("actionUrl", notificationAction.actionUrl);
+        }
+
+        if (notificationAction.type == ChabokNotificationAction.ActionType.Opened) {
+            response.putString("actionType", "opened");
+        } else if (notificationAction.type == ChabokNotificationAction.ActionType.Dismissed) {
+            response.putString("actionType", "dismissed");
+        } else if (notificationAction.type == ChabokNotificationAction.ActionType.ActionTaken) {
+            response.putString("actionType", "action_taken");
+        }
+
+        WritableMap msgMap = Arguments.createMap();
+
+        if (message.getTitle() != null) {
+            msgMap.putString("title", message.getTitle());
+        }
+        if (message.getId() != null) {
+            msgMap.putString("id", message.getId());
+        }
+
+        if (message.getText() != null) {
+            msgMap.putString("body", message.getText());
+        }
+        if (message.getTrackId() != null) {
+            msgMap.putString("trackId", message.getTrackId());
+        }
+        if (message.getTopicName() != null) {
+            msgMap.putString("channel", message.getTopicName());
+        }
+
+        if (message.getSound() != null) {
+            msgMap.putString("sound", message.getSound());
+        }
+
+        try {
+            Bundle data = message.getExtras();
+            if (data != null) {
+                msgMap.putMap("data", toWritableMap(new JSONObject(bundleToJson(data))));
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        response.putMap("message", msgMap);
+
+        if (coldStartChabokNotification == null) {
+            coldStartChabokNotification = message;
+        }
+        if (coldStartChabokNotificationAction == null) {
+            coldStartChabokNotificationAction = notificationAction;
+        }
+
+        if (mReactContext.hasActiveCatalystInstance()) {
+            sendEvent(Constants.EVENT_NOTIFICATION_OPENED, response);
+        }
+    }
+
+    private void attachChabokClient() {
+        chabok.setPushListener(this);
+        fetchAndUpdateConnectionStatus();
+    }
+
+    private void detachClient() {
+        chabok.removePushListener(this);
+        fetchAndUpdateConnectionStatus();
+    }
+
+    private void updateConnectionStatus(final ConnectionStatus connectionStatus) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                String statusValue = connectionStatus.toString();
+                sendEvent(Constants.EVENT_CONNECTION_STATUS, statusValue);
+            }
+        });
+    }
+
+    private void fetchAndUpdateConnectionStatus() {
+        chabok.getStatus(new Callback<ConnectionStatus>() {
+            @Override
+            public void onSuccess(final ConnectionStatus connectionStatus) {
+                updateConnectionStatus(connectionStatus);
+            }
+
+            @Override
+            public void onFailure(Throwable throwable) {
+                Log.i(TAG, "Chabok ConnectionStatus error");
+            }
+        });
+    }
+
+    private WritableMap getPlayServicesStatus() {
+        GoogleApiAvailability gapi = GoogleApiAvailability.getInstance();
+        final int status = gapi.isGooglePlayServicesAvailable(getReactApplicationContext());
+        WritableMap result = Arguments.createMap();
+
+        if (status == ConnectionResult.SUCCESS) {
+            result.putBoolean("isAvailable", true);
+        } else {
+            result.putBoolean("isAvailable", false);
+            result.putString("error", gapi.getErrorString(status));
+            result.putBoolean("isUserResolvableError", gapi.isUserResolvableError(status));
+            result.putBoolean("hasResolution", new ConnectionResult(status).hasResolution());
+        }
+        return result;
+    }
+
+    private void handleNotificationOpened() {
+        if (coldStartChabokNotificationAction != null &&
+                coldStartChabokNotification != null &&
+                (lastMessageId == null || !lastMessageId.contentEquals(coldStartChabokNotification.getId()))) {
+            lastMessageId = coldStartChabokNotification.getId();
+
+            notificationOpenedEvent(coldStartChabokNotification, coldStartChabokNotificationAction);
+
+            coldStartChabokNotification = null;
+            coldStartChabokNotificationAction = null;
+        }
     }
 
     private void sendEvent(String eventName, WritableMap params) {
@@ -924,33 +929,7 @@ class AdpPushClientModule extends ReactContextBaseJavaModule implements Lifecycl
     }
 
     private void sendAppStateChangeEvent() {
-        sendEvent("appStateDidChange", createAppStateEventMap());
-    }
-
-    private void registerMessageHandler() {
-        IntentFilter intentFilter = new IntentFilter("com.adpdigital.push.client.MSGRECEIVE");
-
-        getReactApplicationContext().registerReceiver(new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                if (getReactApplicationContext().hasActiveCatalystInstance()) {
-
-                    WritableMap params = Arguments.createMap();
-                    WritableMap fcmData = Arguments.createMap();
-
-                    sendEvent("messaging_notification_received", params);
-
-                }
-            }
-        }, intentFilter);
-    }
-
-    public class LocalBroadcastReceiver extends BroadcastReceiver {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            String status = intent.getStringExtra("status");
-            sendEvent("connectionStatus", status);
-        }
+        sendEvent(Constants.EVENT_APP_STATE, createAppStateEventMap());
     }
 
     private JSONObject toJsonObject(ReadableMap readableMap) throws JSONException {
