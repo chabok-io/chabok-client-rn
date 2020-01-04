@@ -5,8 +5,6 @@
 
 @interface AdpPushClient : RCTEventEmitter <RCTBridgeModule,RCTInvalidating>
 
-+(NSDictionary *) notificationOpened:(NSDictionary *) payload actionId:(NSString *) actionId;
-+(NSDictionary *) notificationOpened:(NSDictionary *) payload;
-+(void) registerToUNUserNotificationCenter;
+-(instancetype) init;
 
 @end
