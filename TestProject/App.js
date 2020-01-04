@@ -7,12 +7,12 @@
  */
 
 import React from 'react';
-import {StyleSheet, Button, Text, View, TextInput} from 'react-native';
+import {Platform, Linking, StyleSheet, Button, Text, View, TextInput, NativeEventEmitter, NativeModules, ScrollView} from 'react-native';
 import chabok from 'react-native-chabok';
 
 export default class App extends React.Component {
 
-    constructor(){
+    constructor() {
         super();
 
         this.state = {
@@ -26,13 +26,134 @@ export default class App extends React.Component {
         };
     }
 
-    componentDidMount(){
+    componentDidMount() {
         this.initChabok();
+
+        Linking.getInitialURL().then((url) => {
+            console.log('getInitialURL = ', url);
+
+            if (url) {
+                this.handleOpenURL({ url });
+            }
+        });
+        if (Platform.OS === 'ios') {
+            Linking.addEventListener('url', this.handleOpenURL.bind(this));
+        }
+    }
+
+    componentWillUnmount() {
+        Linking.removeEventListener('url', this.handleOpenURL);
     }
 
     initChabok() {
         this.chabok = new chabok.AdpPushClient();
         // this.chabok.setDefaultTracker('jtMMkQ');
+
+        this.chabok.setDeeplinkCallbackListener(deepLink => {
+            console.log('deep link = ' + deepLink);
+            alert('deep link = ' + deepLink);
+        });
+
+        this.chabok.setReferralCallbackListener(referralId => {
+            console.log('referralId = ' + referralId);
+            alert('referralId = ' + referralId);
+        });
+
+        const chabokEmitter = new NativeEventEmitter(NativeModules.AdpPushClient);
+        
+        chabokEmitter.removeAllListeners('onSubscribe');
+        chabokEmitter.removeAllListeners('onUnsubscribe');
+        chabokEmitter.removeAllListeners('connectionStatus');
+        chabokEmitter.removeAllListeners('ChabokMessageReceived');
+        chabokEmitter.removeAllListeners('onEvent');
+        chabokEmitter.removeAllListeners('notificationOpened');
+
+        chabokEmitter.addListener('onSubscribe',
+            (channel) => {
+                console.log('Subscribe on : ', channel);
+                alert('Subscribe on ' + channel.name);
+            });
+
+        chabokEmitter.addListener('onUnsubscribe',
+            (channel) => {
+                console.log('Unsubscribe on : ', channel);
+                alert('Unsubscribe on ' + channel.name);
+            });
+
+        chabokEmitter.addListener('connectionStatus',
+            (status) => {
+                let connectionColor = 'red';
+                let connectionState = 'error';
+
+                if (status === 'CONNECTED') {
+                    connectionColor = 'green';
+                    connectionState = 'Connected';
+                } else if (status === 'CONNECTING') {
+                    connectionColor = 'yellow';
+                    connectionState = 'Connecting';
+                } else if (status === 'DISCONNECTED') {
+                    connectionColor = 'red';
+                    connectionState = 'Disconnected';
+                }
+
+                this.setState({
+                    connectionColor,
+                    connectionState
+                });
+            }
+        );
+
+        chabokEmitter.addListener('ChabokMessageReceived',
+            (msg) => {
+                console.log('ChabokMessageReceived: ' + msg);
+                alert('ChabokMessageReceived: ' + msg);
+                const messageJson = this.getMessages() + JSON.stringify(msg);
+                this.setState({messageReceived: messageJson});
+            }
+        );
+
+        chabokEmitter.addListener('onEvent',
+            (eventMsg) => {
+                console.log('onEvent ' + eventMsg);
+                alert('onEvent ' + eventMsg);
+                const eventMessageJson = this.getEventMessage() + JSON.stringify(eventMsg);
+                this.setState({eventMessage: eventMessageJson});
+            }
+        );
+
+        chabokEmitter.addListener(
+            'notificationOpened',
+            (msg) => {
+                console.log(msg);
+
+                if (msg.actionType === 'opened') {
+                    console.log("Notification opened by user");
+                    alert('Notification opened by user');
+                } else if (msg.actionType === 'dismissed') {
+                    console.log("Notification dismissed by user");
+                    alert('Notification dismissed by user');
+                } else if (msg.actionType === 'action_taken') {
+                    console.log("User tapped on notification ");
+                    alert('User tapped on notification ' + msg.actionId + ' action');
+                }
+
+                if (msg.actionUrl) {
+                    console.log("Got deep link (", msg.actionUrl, ")");
+                    alert('Got deep link (' + msg.actionUrl + ')');
+                }
+            }
+        );
+    }
+
+    handleOpenURL(event) {
+        console.log("Got deep-link url = ", event.url);
+        alert('Got deep-link url = ' + event.url);
+        const route = event.url.replace(/.*?:\/\//g, '');
+        // do something with the url, in our case navigate(route)
+
+        if (event && event.url) {
+            this.chabok.appWillOpenUrl(event.url);
+        }
     }
 
     //  ----------------- Register Group -----------------
@@ -104,7 +225,7 @@ export default class App extends React.Component {
         this.chabok.track('AddToCard',{order:'200'});
     }
     onPurchaseTrackTapped() {
-        this.chabok.track('Purchase',{price:'15000'});
+        this.chabok.trackPurchase('Purchase',{revenue:'15000'});
     }
     onCommentTrackTapped() {
         this.chabok.track('Comment',{postId:'1234555677754d'});
@@ -213,7 +334,9 @@ export default class App extends React.Component {
                     <Button style={styles.button} title="Like"      onPress={this.onLikeTrackTapped.bind(this)}/>
                 </View>
                 <View>
-                    <Text style={styles.textView}>{this.getMessages()}</Text>
+                    <ScrollView>
+                        <Text style={styles.textView}>{this.getMessages()}</Text>
+                    </ScrollView>
                 </View>
             </View>
         );

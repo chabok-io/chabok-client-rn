@@ -11,8 +11,6 @@ export const playServicesAvailability = AdpNativeModule.playServicesAvailability
 
 export class AdpPushClient {
 
-    notificationOpenedHandler = () => AdpNativeModule.setNotificationOpenedHandler();
-
     login = (userId) => AdpNativeModule.login(userId);
 
     appWillOpenUrl = (url) => AdpNativeModule.appWillOpenUrl(url);
@@ -37,15 +35,15 @@ export class AdpPushClient {
     removeFromUserAttributeArray = (attributeKey, attributeValue) => AdpNativeModule.removeFromUserAttributeArray(attributeKey, attributeValue);
 
     incrementUserAttribute = (attribute, value = 1) => {
-        if (typeof value != 'number'){
+        if (typeof value != 'number') {
             throw new Error('Invalid increment value. value = ' + value);
         }
         AdpNativeModule.incrementUserAttribute(attribute, value);
     }
 
-    setDeeplinkCallbackListener = (shouldLaunchDeeplink, deeplinkCallbackListener) => {
-        if (deeplinkCallbackListener){
-            AdpNativeModule.setOnDeeplinkResponseListener(shouldLaunchDeeplink).then((deeplink) => {
+    setDeeplinkCallbackListener = (deeplinkCallbackListener) => {
+        if (deeplinkCallbackListener) {
+            AdpNativeModule.setOnDeeplinkResponseListener().then((deeplink) => {
                 deeplinkCallbackListener(deeplink)
             });
         } else {
@@ -54,7 +52,7 @@ export class AdpPushClient {
     }
 
     setReferralCallbackListener = (referralCallbackListener) => {
-        if (referralCallbackListener){
+        if (referralCallbackListener) {
             AdpNativeModule.setOnReferralResponseListener().then((referralId) => {
                 referralCallbackListener(referralId)
             });
