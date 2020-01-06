@@ -66,6 +66,9 @@ apply plugin: 'com.google.gms.google-services'
 4. Initialize Chabok SDK in your `MainApplication.java`:
 
 ```java
+import com.adpdigital.push.AdpPushClient;
+import com.adpdigital.push.config.Environment;
+
 public class MainApplication extends Application {
     @Override
     public void onCreate() {
