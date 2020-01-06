@@ -37,6 +37,7 @@ buildscript {
     repositories {
         google()
         jcenter()
+	
         maven {
             url "https://plugins.gradle.org/m2/" 
         }
@@ -44,6 +45,7 @@ buildscript {
     
     dependencies {
     	classpath "com.android.tools.build:gradle:3.4.2"
+	
         classpath "io.chabok.plugin:chabok-services:1.0.0"
         classpath "com.google.gms:google-services:4.3.2"
     }
