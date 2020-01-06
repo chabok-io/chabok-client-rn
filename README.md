@@ -42,21 +42,19 @@ buildscript {
         }
     }
     
-    dependencies {    
+    dependencies {
+    	classpath "com.android.tools.build:gradle:3.4.2"
         classpath "io.chabok.plugin:chabok-services:1.0.0"
         classpath "com.google.gms:google-services:4.3.2"
     }
 }
 ```
 
-2. Apply Google and Chabok plugins and add Chabok dependencies to `build.gradle` application level file.
+2. Apply Google and Chabok plugins to `build.gradle` application level file.
 
 ```groovy
 dependencies {
-    implementation 'com.adpdigital.push:chabok-lib:3.1.0'
-    implementation 'me.leolin:ShortcutBadger:1.1.22@aar'  
-    implementation 'com.google.firebase:firebase-messaging:17.1.0'
-    implementation 'com.android.installreferrer:installreferrer:1.0'
+    // your project dependencies
 }
 
 apply plugin: 'io.chabok.plugin.chabok-services'
@@ -70,6 +68,7 @@ public class MainApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+	
         AdpPushClient.configureEnvironment(Environment.SANDBOX); // or PRODUCTION
     }
 }
@@ -77,49 +76,33 @@ public class MainApplication extends Application {
 
 ## Getting started - iOS
 
-1. The native iOS SDKs need to be setup using Cocoapods. In your project's `ios` directory, create a Podfile.
+1. Ensure your iOS projects Pods are up-to-date:
 
 ```bash
 $ cd ios
-$ pod init
+$ pod install --repo-update
 ```
 
-2. Edit the Podfile to include `ChabokPush` as a dependency for your project, and then install the pod with `pod instal`.
-
-```bash
-use_frameworks!
-platform :ios, '9.0'
-
-target 'YOUR_TARGET_NAME' do
-
-  # Pods for AwesomeProject
-  pod 'ChabokPush'
-
-end
-```
-
-3. Import inside `AppDelegate`:
+2. Initialize Chabok SDK in your `AppDelegate.m`:
 
 ```objectivec
-
 #import "AppDelegate.h"
 #import <AdpPushClient/AdpPushClient.h>
 
 - (BOOL)application:(UIApplication *)application
             didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
-    
+
     [PushClientManager.defaultManager configureEnvironment:Sandbox]; // or PRODUCTION
- 
+
     return YES;
 }
-
 ```
 
 ## Basic Usage
 In your `App.js`:
 
 ### Initialize
-For initializing the Chabok in javascript follow the bellow code:
+For initializing the Chabok SDK in javascript follow the bellow code:
 
 ```js
 import { NativeEventEmitter, NativeModules } from 'react-native';
@@ -127,9 +110,6 @@ import chabok from 'react-native-chabok';
 
 this.chabok = new chabok.AdpPushClient();
 ```
-
-### Change chabok environment
-With using `configureEnvironment` can change the Chabok environment to sandbox or production.
 
 ### Login user
 To login user in the Chabok service use `login` method:
