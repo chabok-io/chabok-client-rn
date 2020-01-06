@@ -2,7 +2,7 @@ platform :ios, '9.0'
 require_relative '../node_modules/@react-native-community/cli-platform-ios/native_modules'
 
 target 'TestProject' do
-  pod 'ChabokPush'
+#  pod 'ChabokPush', '~> 2.1.0'
 
   # Pods for TestProject
   pod 'FBLazyVector', :path => "../node_modules/react-native/Libraries/FBLazyVector"
@@ -36,22 +36,23 @@ target 'TestProject' do
   pod 'glog', :podspec => '../node_modules/react-native/third-party-podspecs/glog.podspec'
   pod 'Folly', :podspec => '../node_modules/react-native/third-party-podspecs/Folly.podspec'
 
-  pod 'react-native-chabok', :path => '../node_modules/react-native-chabok'
 
-  target 'TestProjectTests' do
-    inherit! :search_paths
+pod 'react-native-chabok', :path => '../node_modules/react-native-chabok'
+
+#  target 'TestProjectTests' do
+ #   inherit! :search_paths
     # Pods for testing
-  end
+#  end
 
-  use_native_modules!
-end
+#  use_native_modules!
+#end
 
-target 'TestProject-tvOS' do
+#target 'TestProject-tvOS' do
   # Pods for TestProject-tvOS
 
-  target 'TestProject-tvOSTests' do
-    inherit! :search_paths
+ # target 'TestProject-tvOSTests' do
+  #  inherit! :search_paths
     # Pods for testing
-  end
+ # end
 
 end

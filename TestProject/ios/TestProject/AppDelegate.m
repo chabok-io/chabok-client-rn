@@ -15,6 +15,7 @@
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
+  [PushClientManager.defaultManager setLogLevel:ChabokLogLevelVerbose];
   [PushClientManager.defaultManager configureEnvironment:Sandbox];
   
   RCTBridge *bridge = [[RCTBridge alloc] initWithDelegate:self launchOptions:launchOptions];

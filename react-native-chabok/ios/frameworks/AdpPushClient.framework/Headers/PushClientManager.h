@@ -275,6 +275,7 @@ NS_CLASS_AVAILABLE_IOS(7_0)
 @property (nonatomic, readwrite) NSDictionary * _Nullable userAttributes;
 
 @property (nonatomic, readonly) NSDictionary * _Nullable lastNotificationAction;
+@property (nonatomic, readonly) NSDictionary * _Nullable lastNotificationData;
 /*!
  The usingSSLConenction used as secure connection in Manager
  */

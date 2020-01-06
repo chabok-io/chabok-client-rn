@@ -10,7 +10,7 @@
 		</data>
 		<key>Headers/AdpPushClient.h</key>
 		<data>
-		hy5/e+mONDgdHDy276zmjF/gbp4=
+		qB6Gn/Kfcb4ei5NbwCZiOCQWlYc=
 		</data>
 		<key>Headers/ChabokEvent.h</key>
 		<data>
@@ -38,7 +38,7 @@
 		</data>
 		<key>Headers/PushClientManager.h</key>
 		<data>
-		N8Z4KRIZatuI5pC5l2GoTld5Po8=
+		r26hk0AMmGHdIgp14RIoMp2CyXE=
 		</data>
 		<key>Headers/PushClientMessage.h</key>
 		<data>
@@ -50,7 +50,7 @@
 		</data>
 		<key>Info.plist</key>
 		<data>
-		pKcAQrXfFUV+V2vakFB8esFMvus=
+		VEZjDkp/wxXJEtkdlfOHjv8HWqo=
 		</data>
 		<key>Modules/module.modulemap</key>
 		<data>
@@ -74,11 +74,11 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			hy5/e+mONDgdHDy276zmjF/gbp4=
+			qB6Gn/Kfcb4ei5NbwCZiOCQWlYc=
 			</data>
 			<key>hash2</key>
 			<data>
-			wOLmIS6084xahzqOn4Vg7yCUNy+26tGywSmB1h6c9zs=
+			9Apu6wv6U1lvKkfFzr+gx+8aatPR2wwrTlyFHDKMNbw=
 			</data>
 		</dict>
 		<key>Headers/ChabokEvent.h</key>
@@ -151,11 +151,11 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			N8Z4KRIZatuI5pC5l2GoTld5Po8=
+			r26hk0AMmGHdIgp14RIoMp2CyXE=
 			</data>
 			<key>hash2</key>
 			<data>
-			oWh8q1xeFJbfZ9Wv6xkA71n9IVXmfCk/oZ59RTfE+/4=
+			p6ljLV3gTwOYfhRpUSNQySSkOnO7SuNpI+qdIMO6MPA=
 			</data>
 		</dict>
 		<key>Headers/PushClientMessage.h</key>
