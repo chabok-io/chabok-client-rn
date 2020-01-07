@@ -19,6 +19,8 @@ export default class App extends React.Component {
             tagName: '',
             userId: undefined,
             channel: undefined,
+            attributeKey: undefined,
+            attributeValue: undefined,
             connectionColor: 'red',
             messageReceived: undefined,
             connectionState: 'Disconnected',
@@ -182,6 +184,16 @@ export default class App extends React.Component {
             console.warn('The channel name is undefined');
         }
     }
+    onSetAttributesTapped() {
+        const attrs = {
+            'firstname': 'Farbod',
+            'lastname': 'Samsamipour',
+            'age': 28,
+            'isCool': true,
+            'birthday': new Date()
+        };
+        this.chabok.setUserAttributes(attrs);
+    }
 
     // ----------------- Publish Group -----------------
     onPublishTapped() {
@@ -222,20 +234,28 @@ export default class App extends React.Component {
 
   //  ----------------- Track Group -----------------
     onAddToCartTrackTapped() {
-        this.chabok.track('AddToCard',{order:'200'});
+        this.chabok.track('AddToCard', {order: '200', 'buyDate': new Date()});
     }
     onPurchaseTrackTapped() {
-        this.chabok.trackPurchase('Purchase',{revenue:'15000'});
+        this.chabok.trackPurchase('Purchase', {revenue: '15000', data: {'purchaseDatetime': new Date(), 'offPrice': true}});
     }
     onCommentTrackTapped() {
-        this.chabok.track('Comment',{postId:'1234555677754d'});
+        this.chabok.track('Comment', {postId: '1234555677754d', 'commentDate': new Date()});
     }
     onLikeTrackTapped() {
-        this.chabok.track('Like',{postId:'1234555677754d'});
+        this.chabok.track('Like', {postId: '1234555677754d', 'likeDate': new Date()});
     }
 
     getUserId() {
         return this.state.userId || ''
+    }
+
+    getAttributeKey() {
+        return this.state.attributeKey || ''
+    }
+
+    getAttributeValue() {
+        return this.state.attributeValue || ''
     }
 
     getMessages() {
@@ -252,6 +272,19 @@ export default class App extends React.Component {
     getMessageBody() {
         return this.state.messageBody || '';
     }
+
+    onAddToArrayTapped() {
+        this.chabok.addToUserAttributeArray(this.state.attributeKey, this.state.attributeValue);
+    }
+    
+    onRemoveFromArrayTapped() {
+        this.chabok.removeFromUserAttributeArray(this.state.attributeKey, this.state.attributeValue);
+    }
+    
+    onUnsetTapped() {
+        this.chabok.unsetUserAttribute(this.state.attributeKey);
+    }
+
     render() {
         return (
             <View style={styles.container}>
@@ -289,6 +322,10 @@ export default class App extends React.Component {
                         style={styles.button}
                         title="Unsub"
                         onPress={this.onUnsubscribeTapped.bind(this)}/>
+                    <Button
+                        style={styles.button}
+                        title="Attr"
+                        onPress={this.onSetAttributesTapped.bind(this)}/>
                 </View>
 
                 <View style={styles.nestedButtonView}>
@@ -332,6 +369,23 @@ export default class App extends React.Component {
                     <Button style={styles.button} title="Purchase"  onPress={this.onPurchaseTrackTapped.bind(this)}/>
                     <Button style={styles.button} title="Comment"   onPress={this.onCommentTrackTapped.bind(this)}/>
                     <Button style={styles.button} title="Like"      onPress={this.onLikeTrackTapped.bind(this)}/>
+                </View>
+                <View style={styles.nestedButtonView}>
+                    <TextInput
+                        style={styles.input}
+                        placeholder="attribute key"
+                        width="50%"
+                        onChangeText={attributeKey => this.setState({attributeKey})}>{this.getAttributeKey()}</TextInput>
+                    <TextInput
+                        style={styles.input}
+                        placeholder="attribute value"
+                        width="50%"
+                        onChangeText={attributeValue => this.setState({attributeValue})}>{this.getAttributeValue()}</TextInput>
+                </View>
+                <View style={styles.nestedButtonView}>
+                    <Button style={styles.button} title="AddToArray" onPress={this.onAddToArrayTapped.bind(this)}/>
+                    <Button style={styles.button} title="RemoveFromArray"  onPress={this.onRemoveFromArrayTapped.bind(this)}/>
+                    <Button style={styles.button} title="Unset"   onPress={this.onUnsetTapped.bind(this)}/>
                 </View>
                 <View>
                     <ScrollView>
