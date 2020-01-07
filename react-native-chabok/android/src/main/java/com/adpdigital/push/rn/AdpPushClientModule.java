@@ -1,15 +1,9 @@
 package com.adpdigital.push.rn;
 
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
-
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.adpdigital.push.AdpPushClient;
 import com.adpdigital.push.AppState;
@@ -63,9 +57,7 @@ class AdpPushClientModule extends ReactContextBaseJavaModule implements Lifecycl
     private String mAppState = "uninitialized";
 
     private AdpPushClient chabok;
-    private final LocalBroadcastManager localBroadcastManager;
     private ReactApplicationContext mReactContext;
-    private ConnectionLocalBroadcastReceiver mConnectionLocalBroadcastReceiver;
 
     public static ChabokNotification coldStartChabokNotification;
     public static ChabokNotificationAction coldStartChabokNotificationAction;
@@ -83,9 +75,6 @@ class AdpPushClientModule extends ReactContextBaseJavaModule implements Lifecycl
         super(reactContext);
 
         mReactContext = reactContext;
-        localBroadcastManager = LocalBroadcastManager.getInstance(reactContext);
-        mConnectionLocalBroadcastReceiver = new ConnectionLocalBroadcastReceiver();
-
         chabok = AdpPushClient.get();
         if (chabok != null) {
             // handle notifications
@@ -128,10 +117,6 @@ class AdpPushClientModule extends ReactContextBaseJavaModule implements Lifecycl
         if (chabok != null) {
             attachChabokClient();
         }
-        if (mConnectionLocalBroadcastReceiver != null) {
-            localBroadcastManager.registerReceiver(mConnectionLocalBroadcastReceiver,
-                    new IntentFilter(Constants.ACTION_CONNECTION_STATUS));
-        }
 
         sendAppStateChangeEvent();
 
@@ -147,9 +132,6 @@ class AdpPushClientModule extends ReactContextBaseJavaModule implements Lifecycl
 
         if (chabok != null) {
             detachClient();
-        }
-        if (mConnectionLocalBroadcastReceiver != null) {
-            localBroadcastManager.unregisterReceiver(mConnectionLocalBroadcastReceiver);
         }
 
         sendAppStateChangeEvent();
@@ -812,14 +794,6 @@ class AdpPushClientModule extends ReactContextBaseJavaModule implements Lifecycl
             }
         }
         return writableArray;
-    }
-
-    public class ConnectionLocalBroadcastReceiver extends BroadcastReceiver {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            String status = intent.getStringExtra("status");
-            sendEvent(Constants.EVENT_CONNECTION_STATUS, status);
-        }
     }
 
     private void notificationOpenedEvent(ChabokNotification message, ChabokNotificationAction notificationAction) {
