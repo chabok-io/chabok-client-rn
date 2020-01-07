@@ -303,7 +303,7 @@ RCT_EXPORT_METHOD(resetBadge) {
 
 #pragma mark - track
 RCT_EXPORT_METHOD(track:(NSString *) trackName data:(NSDictionary *) data) {
-    [PushClientManager.defaultManager track:trackName data:data];
+    [PushClientManager.defaultManager track:trackName data:[AdpPushClient getFormattedData:data]];
 }
 
 RCT_EXPORT_METHOD(trackPurchase:(NSString *) eventName data:(NSDictionary *) data) {
@@ -317,7 +317,7 @@ RCT_EXPORT_METHOD(trackPurchase:(NSString *) eventName data:(NSDictionary *) dat
         chabokEvent.currency = [data valueForKey:@"currency"];
     }
     if ([data valueForKey:@"data"]) {
-        chabokEvent.data = [data valueForKey:@"data"];
+        chabokEvent.data = [AdpPushClient getFormattedData:[data valueForKey:@"data"]];
     }
     
     [PushClientManager.defaultManager trackPurchase:eventName
@@ -331,7 +331,7 @@ RCT_EXPORT_METHOD(setDefaultTracker:(NSString *) defaultTracker) {
 
 #pragma mark - user attributes
 RCT_EXPORT_METHOD(setUserAttributes:(NSDictionary *) attributes) {
-    [PushClientManager.defaultManager setUserAttributes:attributes];
+    [PushClientManager.defaultManager setUserAttributes:[AdpPushClient getFormattedData:attributes]];
 }
 
 RCT_EXPORT_METHOD(getUserAttributes:(RCTPromiseResolveBlock)resolve
@@ -546,6 +546,20 @@ RCT_EXPORT_METHOD(setOnReferralResponseListener:(RCTPromiseResolveBlock)resolve
         }
     }
     return actionUrl;
+}
+
++(NSDictionary *) getFormattedData:(NSDictionary *)data {
+    NSMutableDictionary *mutableData = [NSMutableDictionary.alloc init];
+    for (NSString *key in [data allKeys]) {
+        // check datetime type
+        if ([key hasPrefix:@"@CHKDATE_"]) {
+            NSString *actualKey = [key substringFromIndex:9];
+            mutableData[actualKey] = [[Datetime alloc] initWithTimestamp:[data[key] longLongValue]];
+        } else {
+            mutableData[key] = data[key];
+        }
+    }
+    return mutableData;
 }
 
 @end

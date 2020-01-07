@@ -27,7 +27,21 @@ export class AdpPushClient {
      */
     getUserInfo = () => AdpNativeModule.getUserAttributes();
 
-    setUserAttributes = (userAttributes) => AdpNativeModule.setUserAttributes(userAttributes);
+    setUserAttributes = (userAttributes) => {
+        var _attrs = {};
+        if (userAttributes) {
+            Object.keys(userAttributes).forEach(function(key) {
+                if (isValidDate(userAttributes[key])) {
+                    console.log(userAttributes[key].getTime());
+                    _attrs['@CHKDATE_' + key] = userAttributes[key].getTime().toString();
+                } else {
+                    _attrs[key] = userAttributes[key];
+                }
+            });
+            AdpNativeModule.setUserAttributes(_attrs);
+        }
+    };
+    
     getUserAttributes = () => AdpNativeModule.getUserAttributes();
 
     unsetUserAttribute = (attributeKey) => AdpNativeModule.unsetUserAttribute(attributeKey);
@@ -62,7 +76,28 @@ export class AdpPushClient {
     }
 
     trackPurchase = (eventName, chabokEvent) => {
-        AdpNativeModule.trackPurchase(eventName, chabokEvent);
+        var _event = {};
+        if (chabokEvent) {
+            Object.keys(chabokEvent).forEach(function(key) {
+                if (key == 'data') {
+                    var _data = {};
+                    Object.keys(chabokEvent[key]).forEach(function(key2) {
+                        if (isValidDate(chabokEvent[key][key2])) {
+                            console.log(chabokEvent[key][key2].getTime());
+                            _data['@CHKDATE_' + key2] = chabokEvent[key][key2].getTime().toString();
+                        } else {
+                            _data[key2] = chabokEvent[key][key2];
+                        }
+                    });
+                    console.log(_data);
+                    _event[key] = _data;
+                } else {
+                    _event[key] = chabokEvent[key];
+                }
+            });
+            console.log(_event);
+        }
+        AdpNativeModule.trackPurchase(eventName, _event);
     }
 
     setDefaultNotificationChannel = (channelName) => {
@@ -138,7 +173,18 @@ export class AdpPushClient {
     }
 
     track = (trackName, data) => {
-        AdpNativeModule.track(trackName, data)
+        var _data = {};
+        if (data) {
+            Object.keys(data).forEach(function(key) {
+                if (isValidDate(data[key])) {
+                    console.log(data[key].getTime());
+                    _data['@CHKDATE_' + key] = data[key].getTime().toString();
+                } else {
+                    _data[key] = data[key];
+                }
+            });
+        }
+        AdpNativeModule.track(trackName, _data)
     }
 
     subscribe = async (channel) => {
@@ -165,3 +211,7 @@ export class AdpPushClient {
         return await AdpNativeModule.unSubscribeEvent(eventName, installationId);
     };
 }
+
+function isValidDate(date) {
+    return date && Object.prototype.toString.call(date) === "[object Date]" && !isNaN(date);
+};

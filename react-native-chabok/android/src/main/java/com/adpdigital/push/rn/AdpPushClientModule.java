@@ -18,6 +18,7 @@ import com.adpdigital.push.ChabokEvent;
 import com.adpdigital.push.ChabokNotification;
 import com.adpdigital.push.ChabokNotificationAction;
 import com.adpdigital.push.ConnectionStatus;
+import com.adpdigital.push.Datetime;
 import com.adpdigital.push.DeferredDataListener;
 import com.adpdigital.push.EventMessage;
 import com.adpdigital.push.NotificationHandler;
@@ -367,7 +368,21 @@ class AdpPushClientModule extends ReactContextBaseJavaModule implements Lifecycl
     public void track(String trackName, ReadableMap data) {
         try {
             if (data != null) {
-                chabok.track(trackName, toJsonObject(data));
+                JSONObject events = toJsonObject(data);
+                JSONObject modifiedEvents = new JSONObject();
+                Iterator<String> keys = events.keys();
+                while (keys.hasNext()) {
+                    String key = keys.next();
+                    if (key.startsWith("@CHKDATE_")) {
+                        String actualKey = key.substring(9);
+                        if (events.get(key) instanceof String) {
+                            modifiedEvents.put(actualKey, new Datetime(Long.valueOf(events.getString(key))));
+                        }
+                    } else {
+                        modifiedEvents.put(key, events.get(key));
+                    }
+                }
+                chabok.track(trackName, modifiedEvents);
             }
         } catch (JSONException e) {
             e.printStackTrace();
@@ -399,7 +414,20 @@ class AdpPushClientModule extends ReactContextBaseJavaModule implements Lifecycl
             }
 
             if (eventData != null) {
-                chabokEvent.setData(eventData);
+                JSONObject modifiedEvents = new JSONObject();
+                Iterator<String> keys = eventData.keys();
+                while (keys.hasNext()) {
+                    String key = keys.next();
+                    if (key.startsWith("@CHKDATE_")) {
+                        String actualKey = key.substring(9);
+                        if (eventData.get(key) instanceof String) {
+                            modifiedEvents.put(actualKey, new Datetime(Long.valueOf(eventData.getString(key))));
+                        }
+                    } else {
+                        modifiedEvents.put(key, eventData.get(key));
+                    }
+                }
+                chabokEvent.setData(modifiedEvents);
             }
 
             chabok.trackPurchase(eventName, chabokEvent);
@@ -599,8 +627,19 @@ class AdpPushClientModule extends ReactContextBaseJavaModule implements Lifecycl
     public void setUserAttributes(ReadableMap data) {
         if (chabok != null) {
             if (data != null) {
-                HashMap<String, Object> userInfo = new HashMap<String, Object>(toMap(data));
-                chabok.setUserAttributes(userInfo);
+                HashMap<String, Object> userInfo = new HashMap<>(toMap(data));
+                HashMap<String, Object> modifiedInfo = new HashMap<>();
+                for (Map.Entry<String, Object> entry : userInfo.entrySet()) {
+                    if (entry.getKey().startsWith("@CHKDATE_")) {
+                        String actualKey = entry.getKey().substring(9);
+                        if (entry.getValue() instanceof String) {
+                            modifiedInfo.put(actualKey, new Datetime(Long.valueOf((String) entry.getValue())));
+                        }
+                    } else {
+                        modifiedInfo.put(entry.getKey(), entry.getValue());
+                    }
+                }
+                chabok.setUserAttributes(modifiedInfo);
             }
         }
     }
