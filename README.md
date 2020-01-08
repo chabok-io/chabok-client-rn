@@ -9,25 +9,14 @@ React native wrapper for chabok library.
 This client library supports react-native to use chabok push library.
 A Wrapper around native library to use chabok functionalities in react-native environment.
 
-## installation
+## Installation
 For installation refer to [React-Native (Bridge) docs](https://doc.chabok.io/react-native-bridge/introducing.html) and platform specific parts (Android and iOS).
 
-To install packages:
+## Release Note
+You can find release note [here](https://doc.chabok.io/react-native-bridge/release-note.html).
 
-```bash
-yarn add react-native-chabok
-```
-or
-
-```bash
-npm install react-native-chabok --save
-```
-
-For linking `react-native-chabok`
-
-```bash
-react-native link react-native-chabok
-```
+## Support
+Please visit [Issues](https://github.com/chabok-io/chabok-client-rn/issues).
 
 ## Getting Started - Android
 1. Add Google and Chabok plugins to `build.gradle` project level file.
