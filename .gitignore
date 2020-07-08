@@ -80,3 +80,11 @@ local.properties
 dist
 
 package-lock\.json
+
+react-native-chabok/android/gradle/
+
+TestProject/ios/Podfile.lock
+
+react-native-chabok/android/gradlew
+
+react-native-chabok/android/gradlew.bat
