@@ -1,11 +1,11 @@
 #import <React/RCTLog.h>
-#import "AdpPushClient.h"
+#import "ChabokPush.h"
 
 @interface PushClientManager(PushManager)
 -(NSString *) getMessageIdFromPayload:(NSDictionary *)payload;
 @end
 
-@interface AdpPushClient()<PushClientManagerDelegate>
+@interface ChabokPush()<PushClientManagerDelegate>
 
 @property (nonatomic, strong) NSString* appId;
 @property (nonatomic, strong) RCTPromiseResolveBlock getDeepLinkResponseCallback;
@@ -28,7 +28,7 @@ static NSString* RCTCurrentAppBackgroundState() {
     return states[@([[UIApplication sharedApplication] applicationState])] ?: @"unknown";
 }
 
-@implementation AdpPushClient
+@implementation ChabokPush
 
 @dynamic coldStartNotificationResult;
 static NSDictionary* _coldStartNotificationResult;
@@ -88,7 +88,7 @@ RCT_EXPORT_MODULE()
                 }
             }
             // prepare last notification
-            [AdpPushClient notificationOpened:[PushClientManager.defaultManager lastNotificationData]
+            [ChabokPush notificationOpened:[PushClientManager.defaultManager lastNotificationData]
             actionId:actionId];
             
             // send notification event
@@ -118,7 +118,7 @@ RCT_EXPORT_MODULE()
             }
         }
         // prepare last notification
-        [AdpPushClient notificationOpened:[PushClientManager.defaultManager lastNotificationData]
+        [ChabokPush notificationOpened:[PushClientManager.defaultManager lastNotificationData]
         actionId:actionId];
         
         // send notification event
@@ -303,7 +303,7 @@ RCT_EXPORT_METHOD(resetBadge) {
 
 #pragma mark - track
 RCT_EXPORT_METHOD(track:(NSString *) trackName data:(NSDictionary *) data) {
-    [PushClientManager.defaultManager track:trackName data:[AdpPushClient getFormattedData:data]];
+    [PushClientManager.defaultManager track:trackName data:[ChabokPush getFormattedData:data]];
 }
 
 RCT_EXPORT_METHOD(trackPurchase:(NSString *) eventName data:(NSDictionary *) data) {
@@ -317,7 +317,7 @@ RCT_EXPORT_METHOD(trackPurchase:(NSString *) eventName data:(NSDictionary *) dat
         chabokEvent.currency = [data valueForKey:@"currency"];
     }
     if ([data valueForKey:@"data"]) {
-        chabokEvent.data = [AdpPushClient getFormattedData:[data valueForKey:@"data"]];
+        chabokEvent.data = [ChabokPush getFormattedData:[data valueForKey:@"data"]];
     }
     
     [PushClientManager.defaultManager trackPurchase:eventName
@@ -331,7 +331,7 @@ RCT_EXPORT_METHOD(setDefaultTracker:(NSString *) defaultTracker) {
 
 #pragma mark - user attributes
 RCT_EXPORT_METHOD(setUserAttributes:(NSDictionary *) attributes) {
-    [PushClientManager.defaultManager setUserAttributes:[AdpPushClient getFormattedData:attributes]];
+    [PushClientManager.defaultManager setUserAttributes:[ChabokPush getFormattedData:attributes]];
 }
 
 RCT_EXPORT_METHOD(getUserAttributes:(RCTPromiseResolveBlock)resolve
@@ -485,7 +485,7 @@ RCT_EXPORT_METHOD(setOnReferralResponseListener:(RCTPromiseResolveBlock)resolve
         actionIdStr = actionId;
         
         if (actionIdStr || !actions) {
-            actionUrl = [AdpPushClient getActionUrlFrom:actionIdStr actions:actions];
+            actionUrl = [ChabokPush getActionUrlFrom:actionIdStr actions:actions];
         }
     }
     
@@ -519,9 +519,9 @@ RCT_EXPORT_METHOD(setOnReferralResponseListener:(RCTPromiseResolveBlock)resolve
 
 +(NSDictionary *) notificationOpened:(NSDictionary *) payload {
     if (@available(iOS 10.0, *)) {
-        return [AdpPushClient notificationOpened:payload actionId:UNNotificationDefaultActionIdentifier];
+        return [ChabokPush notificationOpened:payload actionId:UNNotificationDefaultActionIdentifier];
     } else {
-        return [AdpPushClient notificationOpened:payload actionId:@"unknown"];
+        return [ChabokPush notificationOpened:payload actionId:@"unknown"];
     }
 }
 
@@ -530,7 +530,7 @@ RCT_EXPORT_METHOD(setOnReferralResponseListener:(RCTPromiseResolveBlock)resolve
 }
 
 -(void) userNotificationCenter:(UNUserNotificationCenter *)center didReceiveNotificationResponse:(UNNotificationResponse *)response withCompletionHandler:(void (^)(void))completionHandler API_AVAILABLE(ios(10.0)) API_AVAILABLE(ios(10.0)) {
-    [AdpPushClient notificationOpened:response.notification.request.content.userInfo actionId:response.actionIdentifier];
+    [ChabokPush notificationOpened:response.notification.request.content.userInfo actionId:response.actionIdentifier];
     
     if (self.bridge) {
         [self handleNotificationOpened];

@@ -5,7 +5,7 @@
  */
 import {NativeModules, Platform} from "react-native";
 
-const AdpNativeModule = NativeModules.AdpPushClient;
+const AdpNativeModule = NativeModules.ChabokPush;
 
 export const playServicesAvailability = AdpNativeModule.playServicesAvailability;
 
@@ -41,7 +41,7 @@ export class AdpPushClient {
             AdpNativeModule.setUserAttributes(_attrs);
         }
     };
-    
+
     getUserAttributes = () => AdpNativeModule.getUserAttributes();
 
     unsetUserAttribute = (attributeKey) => AdpNativeModule.unsetUserAttribute(attributeKey);
