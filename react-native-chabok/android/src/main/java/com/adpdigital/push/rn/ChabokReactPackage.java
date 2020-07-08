@@ -11,17 +11,17 @@ import java.util.Collections;
 import java.util.List;
 
 public class ChabokReactPackage implements ReactPackage {
-    private AdpPushClientModule adpPushClientModule;
+    private ChabokPushModule chabokPushModule;
 
-    public AdpPushClientModule getAdpPushClientModule() {
-        return adpPushClientModule;
+    public ChabokPushModule getChabokPushModule() {
+        return chabokPushModule;
     }
 
     @Override
     public List<NativeModule> createNativeModules(ReactApplicationContext reactContext) {
         List<NativeModule> modules = new ArrayList<>();
-        adpPushClientModule = new AdpPushClientModule(reactContext);
-        modules.add(adpPushClientModule);
+        chabokPushModule = new ChabokPushModule(reactContext);
+        modules.add(chabokPushModule);
         return modules;
     }
 
