@@ -9,6 +9,9 @@
 - Support unset user attribute keys by calling `unsetUserAttribute(attributeKey)`.
 - Support datetime value for user attributes and events by using `Datetime` class from Chabok SDK.
 
+### Upgrade note
+- For React Native 0.60 and upper
+
 ### v1.5.0 (22/12/2019)
 - Update Chabok iOS SDK ([v2.0.1](https://github.com/chabok-io/chabok-client-ios/releases/tag/v2.0.1))
 - Update Chabok android SDK ([v3.1.0](https://github.com/chabok-io/chabok-client-android/releases/tag/v3.1.0))
