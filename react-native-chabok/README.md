@@ -68,7 +68,7 @@ The `ChabokPushModule` is a simple bridge for connect the native module and js m
 
 2) For testing iOS bridge you should use `cocoapods` with `1.7.5` version.
 
-3) For running project on android device follow the instruction:
+3) For running project on iOS device follow the instruction:
 
 ```
  cd ios
