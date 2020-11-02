@@ -71,6 +71,10 @@ The `ChabokPushModule` is a simple bridge for connect the native module and js m
 3) For running project on android device follow the instruction:
 
 ```
+ cd ios
+ pod install
+
+ cd ..
  npm run ios
 ```
 
