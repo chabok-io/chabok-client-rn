@@ -87,7 +87,7 @@ If it hasn't any breaking changes follow this instruction:
 ```
 cd react-native-rn
 
-vi react-native-chabok-podspec
+vi react-native-chabok.podspec
 ```
 
 Just change Chabok iOS SDK Version:
