@@ -58,7 +58,7 @@ to:
 ```
 
 #### With breaking changes
-If it has some breaking changes first follow the bellow instruction. After that if breaking changes includes code changes, don't forget apply all changes in `ChabokPushModule.java` bridge class.
+If it has some breaking changes first follow the above instruction. After that if breaking changes includes code changes, don't forget apply all changes in `ChabokPushModule.java` bridge class.
 The `ChabokPushModule` is a simple bridge for connect the native module and js module.
 
 ## iOS contributing instructions:
@@ -104,5 +104,5 @@ to:
 And copy last version of iOS framework into the `react-native-rn/ios/frameworks`:
 
 #### With breaking changes
-If it has some breaking changes first follow the bellow instruction. After that if breaking changes includes code changes, don't forget apply all changes in `ChabokPush.m` bridge class.
+If it has some breaking changes first follow the above instruction. After that if breaking changes includes code changes, don't forget apply all changes in `ChabokPush.m` bridge class.
 The `ChabokPush` is a simple bridge for connect the native module and js module.
