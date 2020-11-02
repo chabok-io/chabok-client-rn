@@ -12,6 +12,12 @@
 
 3) React-Native has any two-way communication channel from the native module to js module and conversely. You have a one-way communication service by calling `emit` method.
 
+4) For running project on android device follow the instruction:
+
+```
+ npm run android
+```
+
 ## Update Android native SDK:
 All Chabok libraries follow the semantic versioning.
 
@@ -43,6 +49,12 @@ The `ChabokPushModule` is a simple bridge for connect the native module and js m
 
 ## Notes:
 1) For developing iOS native bridge use **Xcode** IDE. Open project from `react-native-rn/ios` path.
+
+2) For running project on android device follow the instruction:
+
+```
+ npm run ios
+```
 
 ## Update iOS native SDK:
 All Chabok libraries follow the semantic versioning.
