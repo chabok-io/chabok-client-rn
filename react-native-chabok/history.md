@@ -1,8 +1,8 @@
 ## History
 
 ### v2.0.0 (08/01/2020)
-- Update Chabok iOS SDK ([v2.1.0](https://github.com/chabok-io/chabok-client-ios/releases/tag/v2.1.0))
-- Update Chabok android SDK ([v3.1.2](https://github.com/chabok-io/chabok-client-android/releases/tag/v3.1.2))
+- Update Chabok iOS SDK ([v2.2.0](https://github.com/chabok-io/chabok-client-ios/releases/tag/v2.2.0))
+- Update Chabok android SDK ([v3.4.0](https://github.com/chabok-io/chabok-client-android/releases/tag/v3.4.0))
 - Support referral string with label key in tracker link, you can get referral string by calling `setReferralCallbackListener` method.
 - Support add values to user attribute array fields by calling `addToUserAttributeArray(attributeKey, attributeValue)`.
 - Support remove values from user attribute array fields by calling `removeFromUserAttributeArray(attributeKey, attributeValue)`.
