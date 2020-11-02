@@ -1,0 +1,74 @@
+# Project Notes
+1) For developing in this project use **WebStorm** IDE. This is the best IDE and more compatible with React-Native platform.
+
+2) All js module codes are in `chabok-client-rn/lib` path. After applied changes in the native modules, Don't forget apply them on the js module if need. 
+
+# Android contributing instructions:
+
+## Notes:
+1) For developing Android native bridge use **Android Studio** IDE.
+
+2) Never change the `ChabokReactPackage` class. When this class may change you need to support for spesific version on the React-Native. Their breaking changes always affects of this module.
+
+3) React-Native has any two-way communication channel from the native module to js module and conversely. You have a one-way communication service by calling `emit` method.
+
+## Update Android native SDK:
+All Chabok libraries follow the semantic versioning.
+
+### Without any Breaking changes:
+If it hasn't any breaking changes follow this instruction:
+
+```
+cd react-native-rn/android
+
+vi build.gradle
+```
+
+Just change Chabok Android SDK Version:
+
+from:
+```
+ api 'com.adpdigital.push:chabok-lib:3.4.0'
+``` 
+to:
+```
+ api 'com.adpdigital.push:chabok-lib:3.5.0'
+```
+
+### With breaking changes
+If it has some breaking changes first follow the bellow instruction. After that if breaking changes includes code changes, don't forget apply all changes in `ChabokPushModule.java` bridge class.
+The `ChabokPushModule` is a simple bridge for connect the native module and js module.
+
+# iOS contributing instructions:
+
+## Notes:
+1) For developing iOS native bridge use **Xcode** IDE. Open project from `react-native-rn/ios` path.
+
+## Update iOS native SDK:
+All Chabok libraries follow the semantic versioning.
+
+### Without any Breaking changes:
+If it hasn't any breaking changes follow this instruction:
+
+```
+cd react-native-rn
+
+vi react-native-chabok-podspec
+```
+
+Just change Chabok iOS SDK Version:
+
+from:
+```
+ s.dependency "ChabokPush", "~> 2.2.0"
+``` 
+to:
+```
+ s.dependency "ChabokPush", "~> 2.3.0"
+```
+
+And copy last version of iOS framework into the `react-native-rn/ios/frameworks`:
+
+### With breaking changes
+If it has some breaking changes first follow the bellow instruction. After that if breaking changes includes code changes, don't forget apply all changes in `ChabokPush.m` bridge class.
+The `ChabokPush` is a simple bridge for connect the native module and js module.
