@@ -11,6 +11,7 @@
 
 ### Upgrade note
 - For React Native 0.60 and upper
+- Change `NativeModules.AdpPushClient` to `NativeModules.ChabokPush` in `NativeEventEmitter`
 
 ### v1.5.0 (22/12/2019)
 - Update Chabok iOS SDK ([v2.0.1](https://github.com/chabok-io/chabok-client-ios/releases/tag/v2.0.1))
