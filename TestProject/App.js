@@ -61,8 +61,8 @@ export default class App extends React.Component {
             alert('referralId = ' + referralId);
         });
 
-        const chabokEmitter = new NativeEventEmitter(NativeModules.AdpPushClient);
-        
+        const chabokEmitter = new NativeEventEmitter(NativeModules.ChabokPush);
+
         chabokEmitter.removeAllListeners('onSubscribe');
         chabokEmitter.removeAllListeners('onUnsubscribe');
         chabokEmitter.removeAllListeners('connectionStatus');

@@ -7,8 +7,6 @@ import {NativeModules, Platform} from "react-native";
 
 const AdpNativeModule = NativeModules.ChabokPush;
 
-export const playServicesAvailability = AdpNativeModule.playServicesAvailability;
-
 export class AdpPushClient {
 
     login = (userId) => AdpNativeModule.login(userId);
