@@ -21,7 +21,7 @@
 ## Update Android native SDK:
 All Chabok libraries follow the semantic versioning.
 
-### Without any Breaking changes:
+### Without any breaking changes:
 If it hasn't any breaking changes follow this instruction:
 
 ```
@@ -59,7 +59,7 @@ The `ChabokPushModule` is a simple bridge for connect the native module and js m
 ## Update iOS native SDK:
 All Chabok libraries follow the semantic versioning.
 
-### Without any Breaking changes:
+### Without any breaking changes:
 If it hasn't any breaking changes follow this instruction:
 
 ```
