@@ -1,4 +1,4 @@
-# Content of table:
+# Table of contents:
 * [Project Notes](#project-notes)
 * [Android contributing instructions:](#android-contributing-instructions)
     - [Notes](#notes)
