@@ -24,7 +24,7 @@
 ### Notes:
 1) For developing Android native bridge use **Android Studio** IDE.
 
-2) Never change the `ChabokReactPackage` class. When this class may change you need to support for spesific version on the React-Native. Their breaking changes always affects of this module.
+2) Never change the `ChabokReactPackage` class. When this class may change you need to support for specific version on the React-Native. Their breaking changes always affects of this module.
 
 3) React-Native has any two-way communication channel from the native module to js module and conversely. You have a one-way communication service by calling `emit` method.
 
