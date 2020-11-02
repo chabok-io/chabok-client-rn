@@ -15,7 +15,9 @@
 ## Project Notes
 1) For developing in this project use **WebStorm** IDE. This is the best IDE and more compatible with React-Native platform.
 
-2) All js module codes are in `chabok-client-rn/lib` path. After applied changes in the native modules, Don't forget apply them on the js module if need. 
+2) All js module codes are in `chabok-client-rn/lib` path. After applied changes in the native modules, Don't forget apply them on the js module if need.
+
+3) SDK initialization should be in native side for each platform. For example: iOS users should call `configureEnvironment` method from native SDK in `AppDelegate.m` class.
 
 ## Android contributing instructions:
 
