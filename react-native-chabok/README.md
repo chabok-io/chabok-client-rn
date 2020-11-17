@@ -24,7 +24,7 @@
 ### Notes:
 1) For developing Android native bridge use **Android Studio** IDE.
 
-2) Never change the `ChabokReactPackage` class. When this class may change you need to support for spesific version on the React-Native. Their breaking changes always affects of this module.
+2) Never change the `ChabokReactPackage` class. When this class may change you need to support for specific version on the React-Native. Their breaking changes always affects of this module.
 
 3) React-Native has any two-way communication channel from the native module to js module and conversely. You have a one-way communication service by calling `emit` method.
 
@@ -58,7 +58,7 @@ to:
 ```
 
 #### With breaking changes
-If it has some breaking changes first follow the bellow instruction. After that if breaking changes includes code changes, don't forget apply all changes in `ChabokPushModule.java` bridge class.
+If it has some breaking changes first follow the above instruction. After that if breaking changes includes code changes, don't forget apply all changes in `ChabokPushModule.java` bridge class.
 The `ChabokPushModule` is a simple bridge for connect the native module and js module.
 
 ## iOS contributing instructions:
@@ -68,7 +68,7 @@ The `ChabokPushModule` is a simple bridge for connect the native module and js m
 
 2) For testing iOS bridge you should use `cocoapods` with `1.7.5` version.
 
-3) For running project on android device follow the instruction:
+3) For running project on iOS device follow the instruction:
 
 ```
  cd ios
@@ -87,7 +87,7 @@ If it hasn't any breaking changes follow this instruction:
 ```
 cd react-native-rn
 
-vi react-native-chabok-podspec
+vi react-native-chabok.podspec
 ```
 
 Just change Chabok iOS SDK Version:
@@ -104,5 +104,5 @@ to:
 And copy last version of iOS framework into the `react-native-rn/ios/frameworks`:
 
 #### With breaking changes
-If it has some breaking changes first follow the bellow instruction. After that if breaking changes includes code changes, don't forget apply all changes in `ChabokPush.m` bridge class.
+If it has some breaking changes first follow the above instruction. After that if breaking changes includes code changes, don't forget apply all changes in `ChabokPush.m` bridge class.
 The `ChabokPush` is a simple bridge for connect the native module and js module.
