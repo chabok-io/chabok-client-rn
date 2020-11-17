@@ -1,13 +1,21 @@
 ## History
 
+### v2.1.0 (17/11/2020)
+- Update Chabok iOS SDK ([v2.2.1](https://github.com/chabok-io/chabok-client-ios/releases/tag/v2.2.1))
+- Update Chabok android SDK ([v3.4.1](https://github.com/chabok-io/chabok-client-android/releases/tag/v3.4.1))
+
 ### v2.0.0 (08/01/2020)
-- Update Chabok iOS SDK ([v2.1.0](https://github.com/chabok-io/chabok-client-ios/releases/tag/v2.1.0))
-- Update Chabok android SDK ([v3.1.2](https://github.com/chabok-io/chabok-client-android/releases/tag/v3.1.2))
+- Update Chabok iOS SDK ([v2.2.0](https://github.com/chabok-io/chabok-client-ios/releases/tag/v2.2.0))
+- Update Chabok android SDK ([v3.4.0](https://github.com/chabok-io/chabok-client-android/releases/tag/v3.4.0))
 - Support referral string with label key in tracker link, you can get referral string by calling `setReferralCallbackListener` method.
 - Support add values to user attribute array fields by calling `addToUserAttributeArray(attributeKey, attributeValue)`.
 - Support remove values from user attribute array fields by calling `removeFromUserAttributeArray(attributeKey, attributeValue)`.
 - Support unset user attribute keys by calling `unsetUserAttribute(attributeKey)`.
 - Support datetime value for user attributes and events by using `Datetime` class from Chabok SDK.
+
+### Upgrade note
+- For React Native 0.60 and upper
+- Change `NativeModules.AdpPushClient` to `NativeModules.ChabokPush` in `NativeEventEmitter`
 
 ### v1.5.0 (22/12/2019)
 - Update Chabok iOS SDK ([v2.0.1](https://github.com/chabok-io/chabok-client-ios/releases/tag/v2.0.1))

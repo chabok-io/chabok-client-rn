@@ -46,10 +46,10 @@ import java.util.Set;
 
 import static com.facebook.react.bridge.UiThreadUtil.runOnUiThread;
 
-class AdpPushClientModule extends ReactContextBaseJavaModule implements LifecycleEventListener {
+class ChabokPushModule extends ReactContextBaseJavaModule implements LifecycleEventListener {
 
-    private static final String TAG = "AdpPushClientModule";
-    private static final String NAME = "AdpPushClient";
+    private static final String TAG = "ChabokPushModule";
+    private static final String NAME = "ChabokPush";
 
     public static final String APP_STATE_ACTIVE = "active";
     public static final String APP_STATE_BACKGROUND = "background";
@@ -71,7 +71,7 @@ class AdpPushClientModule extends ReactContextBaseJavaModule implements Lifecycl
         return chabok;
     }
 
-    public AdpPushClientModule(ReactApplicationContext reactContext) {
+    public ChabokPushModule(ReactApplicationContext reactContext) {
         super(reactContext);
 
         mReactContext = reactContext;
@@ -81,8 +81,8 @@ class AdpPushClientModule extends ReactContextBaseJavaModule implements Lifecycl
             chabok.addNotificationHandler(new NotificationHandler() {
                 @Override
                 public boolean notificationOpened(ChabokNotification message, ChabokNotificationAction notificationAction) {
-                    AdpPushClientModule.coldStartChabokNotification = message;
-                    AdpPushClientModule.coldStartChabokNotificationAction = notificationAction;
+                    ChabokPushModule.coldStartChabokNotification = message;
+                    ChabokPushModule.coldStartChabokNotificationAction = notificationAction;
 
                     if (mAppState.equals(APP_STATE_ACTIVE)) {
                         handleNotificationOpened();

@@ -3,7 +3,7 @@
 #import "React/RCTEventEmitter.h"
 #import <AdpPushClient/AdpPushClient.h>
 
-@interface AdpPushClient : RCTEventEmitter <RCTBridgeModule,RCTInvalidating>
+@interface ChabokPush : RCTEventEmitter <RCTBridgeModule,RCTInvalidating>
 
 -(instancetype) init;
 
