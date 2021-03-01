@@ -17,5 +17,5 @@ Pod::Spec.new do |s|
   s.requires_arc = true
 
   s.dependency "React"
-  s.dependency "ChabokPush", "~> 2.2.1"
+  s.dependency "ChabokPush", "~> 2.4.0"
 end
