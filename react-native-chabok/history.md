@@ -1,5 +1,9 @@
 ## History
 
+### v2.2.0 (02/03/2021)
+- Update: Chabok iOS SDK ([v2.4.0](https://github.com/chabok-io/chabok-client-ios/releases/tag/v2.4.0))
+- Update: Chabok android SDK ([v3.6.0](https://github.com/chabok-io/chabok-client-android/releases/tag/v3.6.0))
+
 ### v2.1.0 (17/11/2020)
 - Update Chabok iOS SDK ([v2.2.1](https://github.com/chabok-io/chabok-client-ios/releases/tag/v2.2.1))
 - Update Chabok android SDK ([v3.4.1](https://github.com/chabok-io/chabok-client-android/releases/tag/v3.4.1))
