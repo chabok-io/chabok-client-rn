@@ -54,7 +54,7 @@ from:
 ``` 
 to:
 ```
- api 'com.adpdigital.push:chabok-lib:3.5.0'
+ api 'com.adpdigital.push:chabok-lib:3.6.0'
 ```
 
 #### With breaking changes
@@ -98,7 +98,7 @@ from:
 ``` 
 to:
 ```
- s.dependency "ChabokPush", "~> 2.3.0"
+ s.dependency "ChabokPush", "~> 2.4.0"
 ```
 
 And copy last version of iOS framework into the `react-native-rn/ios/frameworks`:
