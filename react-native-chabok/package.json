@@ -1,7 +1,7 @@
 {
   "name": "react-native-chabok",
   "title": "React native wrapper for Chabok SDK",
-  "version": "2.2.0",
+  "version": "2.3.0",
   "description": "React native wrapper for Chabok SDK",
   "main": "index.js",
   "scripts": {

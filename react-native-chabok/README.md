@@ -54,7 +54,7 @@ from:
 ``` 
 to:
 ```
- api 'com.adpdigital.push:chabok-lib:3.6.0'
+ api 'com.adpdigital.push:chabok-lib:3.7.1'
 ```
 
 #### With breaking changes
