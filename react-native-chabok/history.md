@@ -1,6 +1,6 @@
 ## History
 
-### v2.3.0 (25/11/2021)
+### v2.3.0 (25/11/2022)
 - Update: Chabok android SDK ([v3.7.1](https://github.com/chabok-io/chabok-client-android/releases/tag/v3.7.1))
 
 ### v2.2.0 (02/03/2021)
